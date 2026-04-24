@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduSchedule — Gestion des Emplois du Temps</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── HEADER ─────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">EduSchedule</span>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-btn active" data-tab="timetable">Emploi du temps</button>
+        <button class="nav-btn" data-tab="entities">Gestion des données</button>
+      </nav>
+      <div class="header-actions">
+        <button class="btn-icon" id="exportBtn" title="Exporter en JSON">↓ Export</button>
+        <button class="btn-icon btn-danger" id="resetBtn" title="Réinitialiser">⚠ Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── TOAST NOTIFICATION ─────────────────────────────── -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ─── MAIN CONTENT ───────────────────────────────────── -->
+  <main class="app-main">
+
+    <!-- ════════ TAB : EMPLOI DU TEMPS ════════ -->
+    <section id="tab-timetable" class="tab-content active">
+
+      <div class="section-header">
+        <div>
+          <h1 class="section-title">Emploi du Temps</h1>
+          <p class="section-sub">Visualisez et gérez les cours de la semaine</p>
+        </div>
+        <div class="filter-bar">
+          <label>Filtrer par</label>
+          <select id="filterType">
+            <option value="all">— Tout afficher —</option>
+            <option value="class">Classe</option>
+            <option value="teacher">Professeur</option>
+            <option value="room">Salle</option>
+          </select>
+          <select id="filterValue" disabled>
+            <option value="">— Choisir —</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Grille -->
+      <div class="timetable-wrapper">
+        <div class="timetable-scroll">
+          <table class="timetable" id="timetableGrid">
+            <!-- Générée par JS -->
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ════════ TAB : GESTION DES DONNÉES ════════ -->
+    <section id="tab-entities" class="tab-content">
+
+      <div class="section-header">
+        <div>
+          <h1 class="section-title">Gestion des Données</h1>
+          <p class="section-sub">Classes · Professeurs · Salles · Matières</p>
+        </div>
+      </div>
+
+      <div class="entities-grid">
+
+        <!-- Classes -->
+        <div class="entity-card">
+          <div class="entity-card-header">
+            <span class="entity-icon">🏫</span>
+            <h2>Classes</h2>
+          </div>
+          <form class="entity-form" id="form-classes">
+            <input type="hidden" id="class-edit-id" />
+            <input class="input" type="text" id="class-name" placeholder="Ex : Terminale A" required />
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Ajouter</button>
+              <button type="button" class="btn btn-ghost hidden" id="class-cancel">Annuler</button>
+            </div>
+          </form>
+          <ul class="entity-list" id="list-classes"></ul>
+        </div>
+
+        <!-- Professeurs -->
+        <div class="entity-card">
+          <div class="entity-card-header">
+            <span class="entity-icon">👨‍🏫</span>
+            <h2>Professeurs</h2>
+          </div>
+          <form class="entity-form" id="form-teachers">
+            <input type="hidden" id="teacher-edit-id" />
+            <input class="input" type="text" id="teacher-name" placeholder="Ex : M. Kamga" required />
+            <input class="input" type="text" id="teacher-subject" placeholder="Matière principale (optionnel)" />
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Ajouter</button>
+              <button type="button" class="btn btn-ghost hidden" id="teacher-cancel">Annuler</button>
+            </div>
+          </form>
+          <ul class="entity-list" id="list-teachers"></ul>
+        </div>
+
+        <!-- Salles -->
+        <div class="entity-card">
+          <div class="entity-card-header">
+            <span class="entity-icon">🚪</span>
+            <h2>Salles</h2>
+          </div>
+          <form class="entity-form" id="form-rooms">
+            <input type="hidden" id="room-edit-id" />
+            <input class="input" type="text" id="room-name" placeholder="Ex : Salle 101" required />
+            <input class="input" type="number" id="room-capacity" placeholder="Capacité (optionnel)" min="1" />
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Ajouter</button>
+              <button type="button" class="btn btn-ghost hidden" id="room-cancel">Annuler</button>
+            </div>
+          </form>
+          <ul class="entity-list" id="list-rooms"></ul>
+        </div>
+
+        <!-- Matières -->
+        <div class="entity-card">
+          <div class="entity-card-header">
+            <span class="entity-icon">📚</span>
+            <h2>Matières</h2>
+          </div>
+          <form class="entity-form" id="form-subjects">
+            <input type="hidden" id="subject-edit-id" />
+            <input class="input" type="text" id="subject-name" placeholder="Ex : Mathématiques" required />
+            <input class="input" type="color" id="subject-color" value="#4f7cff" title="Couleur de la matière" />
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Ajouter</button>
+              <button type="button" class="btn btn-ghost hidden" id="subject-cancel">Annuler</button>
+            </div>
+          </form>
+          <ul class="entity-list" id="list-subjects"></ul>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── MODAL : AJOUT DE COURS ─────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Ajouter un cours</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+
+      <div class="modal-slot-info" id="modalSlotInfo"></div>
+
+      <form id="course-form" class="modal-form">
+        <input type="hidden" id="slot-day" />
+        <input type="hidden" id="slot-hour" />
+        <input type="hidden" id="slot-course-id" />
+
+        <div class="form-group">
+          <label>Classe <span class="required">*</span></label>
+          <select class="input" id="course-class" required>
+            <option value="">— Sélectionner une classe —</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Professeur <span class="required">*</span></label>
+          <select class="input" id="course-teacher" required>
+            <option value="">— Sélectionner un professeur —</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Matière <span class="required">*</span></label>
+          <select class="input" id="course-subject" required>
+            <option value="">— Sélectionner une matière —</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Salle</label>
+          <select class="input" id="course-room">
+            <option value="">— Aucune salle —</option>
+          </select>
+        </div>
+
+        <div id="conflict-alert" class="conflict-alert hidden">
+          <span class="conflict-icon">⚠</span>
+          <span id="conflict-message"></span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="modalCancel">Annuler</button>
+          <button type="button" class="btn btn-danger hidden" id="deleteCourseBtn">Supprimer</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
